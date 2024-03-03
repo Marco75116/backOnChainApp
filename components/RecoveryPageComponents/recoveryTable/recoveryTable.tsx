@@ -27,7 +27,7 @@ const RecoveryTable = () => {
 	}, [walletSearch, requestTypeFilter]);
 
 	return (
-		<div className="mx-24 mt-10 ">
+		<div className=" flex-1">
 			<TopTable />
 
 			<div className="rounded-md border">

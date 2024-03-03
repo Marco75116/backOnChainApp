@@ -1,16 +1,16 @@
 "use client";
 import React from "react";
-import { Input } from "../ui/input";
+import { Input } from "../../ui/input";
 import {
 	Select,
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from "../ui/select";
+} from "../../ui/select";
 import { requestTypes, requestTypesFilter } from "@/lib/types/type.global";
 import { useRequestsFilter } from "@/lib/stores/requestsFilter.store";
-import { Button } from "../ui/button";
+import { Button } from "../../ui/button";
 import { useAccount } from "wagmi";
 
 const TopTable = () => {

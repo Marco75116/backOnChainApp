@@ -2,10 +2,10 @@
 import React, { useMemo } from "react";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Request } from "@/lib/types/type.global";
-import { Button } from "../ui/button";
+import { Button } from "../../ui/button";
 import { Copy } from "lucide-react";
 import { copyToClipboard } from "@/lib/helpers/global.helper";
-import { useToast } from "../ui/use-toast";
+import { useToast } from "../../ui/use-toast";
 
 type RowRequestProps = {
 	request: Request;
