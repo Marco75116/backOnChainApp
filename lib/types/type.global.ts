@@ -1,3 +1,5 @@
+import { StaticImageData } from "next/image";
+
 export const requestTypes = ["Request Received", "Request Made"] as const;
 export const requestTypesFilter = ["Request All", ...requestTypes];
 
@@ -7,4 +9,11 @@ export type Request = {
   walletTarget: string;
   dateRequest: string;
   remainDays: string; // or number if you prefer to store the remaining days as a numerical value
+};
+
+export type TokenBalance = {
+  addressToken: string;
+  symbol: string;
+  imgSrc: StaticImageData;
+  balance: number;
 };

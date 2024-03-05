@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import backOnchainLogo from "@/lib/assets/logos/backOnChain.jpeg";
 import { Input } from "@/components/ui/input";
-import Image, { StaticImageData } from "next/image";
+import Image from "next/image";
 import { Button } from "../ui/button";
 
 type DialogRequestRecoveryProps = {

@@ -1,4 +1,7 @@
-import { Request } from "../types/type.global";
+import { Request, TokenBalance } from "../types/type.global";
+import ethLogo from "@/lib/assets/tokens/ethereum.png";
+import usdtLogo from "@/lib/assets/tokens/usdt.png";
+import maticLogo from "@/lib/assets/tokens/polygon.png";
 
 export const menu = [
   {
@@ -51,5 +54,26 @@ export const mockRequests: Request[] = [
     walletTarget: "0x01738387092E007CcB8B5a73sdc2a9BA23cf91d3",
     dateRequest: "1 janvier 14 : 23",
     remainDays: "88",
+  },
+];
+
+export const mockWalletBalance: TokenBalance[] = [
+  {
+    addressToken: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    symbol: "ETH",
+    imgSrc: ethLogo,
+    balance: 1.5,
+  },
+  {
+    addressToken: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+    symbol: "USDT",
+    imgSrc: usdtLogo,
+    balance: 1999,
+  },
+  {
+    addressToken: "0x7c9f4C87d911613Fe9ca58b579f737911AAD2D43",
+    symbol: "WMATIC",
+    imgSrc: maticLogo,
+    balance: 199,
   },
 ];
