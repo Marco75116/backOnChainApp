@@ -17,3 +17,9 @@ export type TokenBalance = {
   imgSrc: StaticImageData;
   balance: number;
 };
+
+export type SuperWallet = {
+  wallet: string;
+  timeToRecovery: number;
+  numberTokens: number;
+};

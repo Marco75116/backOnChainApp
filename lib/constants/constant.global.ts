@@ -77,3 +77,21 @@ export const mockWalletBalance: TokenBalance[] = [
     balance: 199,
   },
 ];
+
+export const mockYourSuperWallets = [
+  {
+    wallet: "0x21557653ca416fb59702BF34575f01FF529D278b",
+    timeToRecovery: 15,
+    numberTokens: 3,
+  },
+  {
+    wallet: "0xEE72F1035C706478F84AB9480E45B427Aa6B6682",
+    timeToRecovery: 50,
+    numberTokens: 5,
+  },
+  {
+    wallet: "0x21557653ca416fb59702BF34575f01FF529D278b",
+    timeToRecovery: 45,
+    numberTokens: 1,
+  },
+];
