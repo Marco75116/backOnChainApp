@@ -1,7 +1,7 @@
 import { Request, TokenBalance } from "../types/type.global";
 import ethLogo from "@/lib/assets/tokens/ethereum.png";
 import usdtLogo from "@/lib/assets/tokens/usdt.png";
-import maticLogo from "@/lib/assets/tokens/polygon.png";
+import daiLogo from "@/lib/assets/tokens/dai.png";
 
 export const menu = [
   {
@@ -59,21 +59,21 @@ export const mockRequests: Request[] = [
 
 export const mockWalletBalance: TokenBalance[] = [
   {
-    addressToken: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-    symbol: "ETH",
+    addressToken: "0xf48c61Cc6DBCF6f4Dd1C93d29De27Fd0832843bE",
+    symbol: "WETH",
     imgSrc: ethLogo,
     balance: 1.5,
   },
   {
-    addressToken: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+    addressToken: "0x5492dE05F89501A4a6F5d3dE85675541E42534C2",
     symbol: "USDT",
     imgSrc: usdtLogo,
     balance: 1999,
   },
   {
-    addressToken: "0x7c9f4C87d911613Fe9ca58b579f737911AAD2D43",
-    symbol: "WMATIC",
-    imgSrc: maticLogo,
+    addressToken: "0xC2Eb52200586aF9594B93618b55B460e07E4ddBd",
+    symbol: "DAI",
+    imgSrc: daiLogo,
     balance: 199,
   },
 ];
@@ -95,3 +95,5 @@ export const mockYourSuperWallets = [
     numberTokens: 1,
   },
 ];
+
+export const timeByBlock = 24 * 1000;

@@ -12,7 +12,7 @@ export type Request = {
 };
 
 export type TokenBalance = {
-  addressToken: string;
+  addressToken: `0x${string}`;
   symbol: string;
   imgSrc: StaticImageData;
   balance: number;

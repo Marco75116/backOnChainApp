@@ -41,7 +41,10 @@ const RowRequest = ({ request }: RowRequestProps) => {
 	}, [request.walletTarget]);
 
 	const actionCell = useMemo(() => {
-		if (request.status === "pending") return <Button>Claim</Button>;
+		if (request.status === "pending" && request.request === "Request Made")
+			return <Button>Cancel</Button>;
+		if (request.status === "pending" && request.request === "Request Received")
+			return <Button>Claim</Button>;
 	}, [request]);
 
 	return (
