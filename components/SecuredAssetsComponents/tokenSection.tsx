@@ -16,7 +16,6 @@ type TokenSectionProps = {
 
 const TokenSection = ({ tokenBalance }: TokenSectionProps) => {
 	const { address } = useAccount();
-	const num = Math.floor(Math.random() * 100);
 
 	const erc20Contract = {
 		address: `${tokenBalance.addressToken}`,

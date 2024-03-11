@@ -63,18 +63,21 @@ export const mockWalletBalance: TokenBalance[] = [
     symbol: "WETH",
     imgSrc: ethLogo,
     balance: 1.5,
+    decimals: 18,
   },
   {
     addressToken: "0x5492dE05F89501A4a6F5d3dE85675541E42534C2",
     symbol: "USDT",
     imgSrc: usdtLogo,
     balance: 1999,
+    decimals: 6,
   },
   {
     addressToken: "0xC2Eb52200586aF9594B93618b55B460e07E4ddBd",
     symbol: "DAI",
     imgSrc: daiLogo,
     balance: 199,
+    decimals: 18,
   },
 ];
 

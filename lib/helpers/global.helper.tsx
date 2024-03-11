@@ -25,3 +25,27 @@ export const displayDecimalNumber = (
 
 	return trimmedEtherStr;
 };
+
+export const stringToBigIntWithDecimals = (
+	amountStr: string,
+	decimalPlaces: number,
+) => {
+	const dotIndex = amountStr.indexOf(".");
+	let integralPart = amountStr;
+	let fractionalPart = "";
+
+	if (dotIndex !== -1) {
+		integralPart = amountStr.substring(0, dotIndex);
+		fractionalPart = amountStr.substring(dotIndex + 1);
+	}
+
+	if (fractionalPart.length > decimalPlaces) {
+		fractionalPart = fractionalPart.substring(0, decimalPlaces);
+	} else {
+		fractionalPart = fractionalPart.padEnd(decimalPlaces, "0");
+	}
+
+	const combined = integralPart + fractionalPart;
+
+	return BigInt(combined);
+};

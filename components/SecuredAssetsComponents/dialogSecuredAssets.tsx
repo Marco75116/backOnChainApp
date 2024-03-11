@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
 	Dialog,
 	DialogClose,
@@ -21,18 +21,72 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { mockWalletBalance } from "@/lib/constants/constant.global";
-import SelectToken from "./selectToken";
+import {
+	mockWalletBalance,
+	timeByBlock,
+} from "@/lib/constants/constant.global";
 import { useSecureTokenSelection } from "@/lib/stores/secureTokenSelection";
+import { useAccount, useReadContracts, useWriteContract } from "wagmi";
+import { addressBackOnChain } from "@/lib/constants/addresses";
+import { abiBackOnChain } from "@/lib/constants/abis/abiBackOnChain";
+import { stringToBigIntWithDecimals } from "@/lib/helpers/global.helper";
+import { erc20Abi, zeroAddress } from "viem";
+import { TokenBalance } from "@/lib/types/type.global";
 
 type DialogSecuredAssetsProps = {
 	placeholder: string;
 };
 
 const DialogSecuredAssets = ({ placeholder }: DialogSecuredAssetsProps) => {
-	const [amount, setAmount] = useState<number>(0);
+	const [amount, setAmount] = useState<string>("0");
 	const { tokensSelection, setTokensSelection } = useSecureTokenSelection();
-	console.log(tokensSelection);
+	const { writeContract } = useWriteContract();
+	const { address } = useAccount();
+
+	const tokenSelected = useMemo(() => {
+		return mockWalletBalance.find((balance) => {
+			return balance.symbol === tokensSelection;
+		}) as TokenBalance;
+	}, [tokensSelection]);
+
+	const erc20Contract = {
+		address: `${tokenSelected?.addressToken}`,
+		abi: erc20Abi,
+	} as const;
+
+	const { data: dataAllowance, isSuccess: isSuccessBalanceWallet } =
+		useReadContracts({
+			allowFailure: false,
+			contracts: [
+				{
+					...erc20Contract,
+					functionName: "allowance",
+					args: [`${address || zeroAddress}`, addressBackOnChain],
+				},
+				{
+					...erc20Contract,
+					functionName: "decimals",
+				},
+			],
+			query: {
+				refetchInterval: timeByBlock / 2,
+				enabled: tokenSelected !== undefined,
+			},
+		});
+
+	const amountTokenBigInt = useMemo(() => {
+		return stringToBigIntWithDecimals(
+			amount,
+			tokenSelected?.decimals as number,
+		);
+	}, [amount, tokenSelected]);
+
+	const isApproveNeeded = useMemo(() => {
+		if (isSuccessBalanceWallet) {
+			return amountTokenBigInt > dataAllowance?.[0];
+		}
+	}, [isSuccessBalanceWallet, amountTokenBigInt, dataAllowance?.[0]]);
+
 	return (
 		<Dialog>
 			<DialogTrigger>
@@ -52,7 +106,7 @@ const DialogSecuredAssets = ({ placeholder }: DialogSecuredAssetsProps) => {
 								type="number"
 								placeholder={placeholder}
 								onChange={(e) => {
-									setAmount(Number(e.target.value));
+									setAmount(e.target.value);
 								}}
 							/>
 							<Select
@@ -66,7 +120,11 @@ const DialogSecuredAssets = ({ placeholder }: DialogSecuredAssetsProps) => {
 								</SelectTrigger>
 								<SelectContent>
 									{mockWalletBalance.map((b) => (
-										<SelectItem key={b.symbol} value={b.symbol}>
+										<SelectItem
+											key={b.symbol}
+											value={b.symbol}
+											onClick={() => {}}
+										>
 											<div className="flex flex-row gap-2">
 												<Image src={b.imgSrc} alt="token img" height={20} />
 												<div>{b.symbol}</div>
@@ -77,15 +135,34 @@ const DialogSecuredAssets = ({ placeholder }: DialogSecuredAssetsProps) => {
 							</Select>
 						</div>
 					</DialogDescription>
-					<DialogClose>
-						<Button
-							disabled={
-								!amount || amount === 0 || tokensSelection === undefined
+					<Button
+						disabled={
+							!amount ||
+							amount === "" ||
+							amount === "0" ||
+							Number(amount) < 0 ||
+							tokensSelection === undefined
+						}
+						onClick={() => {
+							{
+								isApproveNeeded
+									? writeContract({
+											address: tokenSelected.addressToken,
+											abi: erc20Abi,
+											functionName: "approve",
+											args: [addressBackOnChain, amountTokenBigInt],
+									  })
+									: writeContract({
+											address: addressBackOnChain,
+											abi: abiBackOnChain,
+											functionName: "get_ERC20",
+											args: [tokenSelected?.addressToken, amountTokenBigInt],
+									  });
 							}
-						>
-							Validate
-						</Button>
-					</DialogClose>
+						}}
+					>
+						{isApproveNeeded ? "Approve " : "Validate"}
+					</Button>
 				</DialogHeader>
 			</DialogContent>
 		</Dialog>

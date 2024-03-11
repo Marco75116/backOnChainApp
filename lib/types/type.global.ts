@@ -16,6 +16,7 @@ export type TokenBalance = {
   symbol: string;
   imgSrc: StaticImageData;
   balance: number;
+  decimals: number;
 };
 
 export type SuperWallet = {
