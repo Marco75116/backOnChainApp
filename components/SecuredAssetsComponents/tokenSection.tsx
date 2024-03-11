@@ -3,7 +3,12 @@ import { TokenBalance } from "@/lib/types/type.global";
 import React, { useMemo } from "react";
 import { Button } from "../ui/button";
 import Image from "next/image";
-import { useAccount, useReadContracts } from "wagmi";
+import {
+	useAccount,
+	useChainId,
+	useReadContracts,
+	useWriteContract,
+} from "wagmi";
 import { erc20Abi, zeroAddress } from "viem";
 import { displayDecimalNumber } from "@/lib/helpers/global.helper";
 import { timeByBlock } from "@/lib/constants/constant.global";
@@ -16,6 +21,8 @@ type TokenSectionProps = {
 
 const TokenSection = ({ tokenBalance }: TokenSectionProps) => {
 	const { address } = useAccount();
+	const chainid = useChainId();
+	const { writeContract } = useWriteContract();
 
 	const erc20Contract = {
 		address: `${tokenBalance.addressToken}`,
@@ -27,28 +34,31 @@ const TokenSection = ({ tokenBalance }: TokenSectionProps) => {
 		abi: abiBackOnChain,
 	} as const;
 
-	const { data: dataBalanceWallet, isSuccess: isSuccessBalanceWallet } =
-		useReadContracts({
-			allowFailure: false,
-			contracts: [
-				{
-					...erc20Contract,
-					functionName: "balanceOf",
-					args: [`${address || zeroAddress}`],
-				},
-				{
-					...erc20Contract,
-					functionName: "decimals",
-				},
-				{
-					...erc20Contract,
-					functionName: "symbol",
-				},
-			],
-			query: {
-				refetchInterval: timeByBlock,
+	const {
+		data: dataBalanceWallet,
+		isSuccess: isSuccessBalanceWallet,
+		error,
+	} = useReadContracts({
+		allowFailure: false,
+		contracts: [
+			{
+				...erc20Contract,
+				functionName: "balanceOf",
+				args: [`${address || zeroAddress}`],
 			},
-		});
+			{
+				...erc20Contract,
+				functionName: "decimals",
+			},
+			{
+				...erc20Contract,
+				functionName: "symbol",
+			},
+		],
+		query: {
+			refetchInterval: timeByBlock,
+		},
+	});
 
 	const { data, isSuccess } = useReadContracts({
 		allowFailure: false,
@@ -112,7 +122,18 @@ const TokenSection = ({ tokenBalance }: TokenSectionProps) => {
 				{balanceBackOnChain} {tokenBalance.symbol}
 			</div>
 			<div className="flex items-center col-span-1 justify-end">
-				<Button>Withdraw</Button>
+				<Button
+					onClick={() => {
+						writeContract({
+							address: addressBackOnChain,
+							abi: abiBackOnChain,
+							functionName: "delete_ERC20",
+							args: [tokenBalance.addressToken, data?.[0]],
+						});
+					}}
+				>
+					Withdraw
+				</Button>
 			</div>
 		</p>
 	);
