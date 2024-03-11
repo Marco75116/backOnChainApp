@@ -7,6 +7,8 @@ import { useAccount, useReadContracts } from "wagmi";
 import { erc20Abi, zeroAddress } from "viem";
 import { displayDecimalNumber } from "@/lib/helpers/global.helper";
 import { timeByBlock } from "@/lib/constants/constant.global";
+import { abiBackOnChain } from "@/lib/constants/abis/abiBackOnChain";
+import { addressBackOnChain } from "@/lib/constants/addresses";
 
 type TokenSectionProps = {
 	tokenBalance: TokenBalance;
@@ -21,21 +23,44 @@ const TokenSection = ({ tokenBalance }: TokenSectionProps) => {
 		abi: erc20Abi,
 	} as const;
 
-	const { data, dataUpdatedAt, isSuccess, isError } = useReadContracts({
+	const backOnChainContract = {
+		address: addressBackOnChain,
+		abi: abiBackOnChain,
+	} as const;
+
+	const { data: dataBalanceWallet, isSuccess: isSuccessBalanceWallet } =
+		useReadContracts({
+			allowFailure: false,
+			contracts: [
+				{
+					...erc20Contract,
+					functionName: "balanceOf",
+					args: [`${address || zeroAddress}`],
+				},
+				{
+					...erc20Contract,
+					functionName: "decimals",
+				},
+				{
+					...erc20Contract,
+					functionName: "symbol",
+				},
+			],
+			query: {
+				refetchInterval: timeByBlock,
+			},
+		});
+
+	const { data, isSuccess } = useReadContracts({
 		allowFailure: false,
 		contracts: [
 			{
-				...erc20Contract,
-				functionName: "balanceOf",
-				args: [`${address || zeroAddress}`],
-			},
-			{
-				...erc20Contract,
-				functionName: "decimals",
-			},
-			{
-				...erc20Contract,
-				functionName: "symbol",
+				...backOnChainContract,
+				functionName: "tokens_ERC20",
+				args: [
+					`${address || zeroAddress}`,
+					`${tokenBalance.addressToken || zeroAddress}`,
+				],
 			},
 		],
 		query: {
@@ -44,13 +69,26 @@ const TokenSection = ({ tokenBalance }: TokenSectionProps) => {
 	});
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
-	const balance = useMemo(() => {
-		if (isSuccess) {
-			const balance = Number(displayDecimalNumber(data?.[0], data?.[1]));
+	const balanceWallet = useMemo(() => {
+		if (isSuccessBalanceWallet) {
+			const balance = Number(
+				displayDecimalNumber(dataBalanceWallet?.[0], dataBalanceWallet?.[1]),
+			);
 			return balance;
 		}
 		return "0";
-	}, [isSuccess, data]);
+	}, [isSuccess, dataBalanceWallet]);
+
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	const balanceBackOnChain = useMemo(() => {
+		if (isSuccess && isSuccessBalanceWallet) {
+			const balance = Number(
+				displayDecimalNumber(data?.[0] as bigint, dataBalanceWallet?.[1]),
+			);
+			return balance;
+		}
+		return "0";
+	}, [isSuccess, isSuccessBalanceWallet, data]);
 
 	return (
 		<p
@@ -65,14 +103,14 @@ const TokenSection = ({ tokenBalance }: TokenSectionProps) => {
 						<span className="text-muted-foreground">
 							Balance Wallet :&nbsp;
 						</span>
-						{balance} {tokenBalance.symbol}
+						{balanceWallet} {tokenBalance.symbol}
 					</div>
 				</div>
 			</div>
 
 			<div className="flex items-center col-span-5 ">
-				<span className="text-bcPink">protected by BakcOnChain :&nbsp;</span>
-				{tokenBalance.balance + num} {tokenBalance.symbol}
+				<span className="text-bcPink">protected by BackOnChain :&nbsp;</span>
+				{balanceBackOnChain} {tokenBalance.symbol}
 			</div>
 			<div className="flex items-center col-span-1 justify-end">
 				<Button>Withdraw</Button>
