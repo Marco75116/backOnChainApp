@@ -1,5 +1,5 @@
 "use client";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
 	Dialog,
 	DialogClose,
@@ -26,12 +26,18 @@ import {
 	timeByBlock,
 } from "@/lib/constants/constant.global";
 import { useSecureTokenSelection } from "@/lib/stores/secureTokenSelection";
-import { useAccount, useReadContracts, useWriteContract } from "wagmi";
+import {
+	useAccount,
+	useReadContracts,
+	useWaitForTransactionReceipt,
+	useWriteContract,
+} from "wagmi";
 import { addressBackOnChain } from "@/lib/constants/addresses";
 import { abiBackOnChain } from "@/lib/constants/abis/abiBackOnChain";
 import { stringToBigIntWithDecimals } from "@/lib/helpers/global.helper";
 import { erc20Abi, zeroAddress } from "viem";
 import { TokenBalance } from "@/lib/types/type.global";
+import useProcessTxState from "@/lib/stores/processTxState.store";
 
 type DialogSecuredAssetsProps = {
 	placeholder: string;
@@ -40,7 +46,28 @@ type DialogSecuredAssetsProps = {
 const DialogSecuredAssets = ({ placeholder }: DialogSecuredAssetsProps) => {
 	const [amount, setAmount] = useState<string>("0");
 	const { tokensSelection, setTokensSelection } = useSecureTokenSelection();
-	const { writeContract } = useWriteContract();
+	const { setWaitingConformation, removePendingTx, addPendingTx } =
+		useProcessTxState();
+	const {
+		data: hash,
+		isPending,
+		writeContract,
+	} = useWriteContract({
+		mutation: {
+			onSuccess() {
+				addPendingTx();
+			},
+		},
+	});
+	const { isLoading: isConfirming, isSuccess: isConfirmed } =
+		useWaitForTransactionReceipt({
+			hash,
+		});
+
+	useEffect(() => {
+		if (isConfirmed) removePendingTx();
+	}, [isConfirmed, removePendingTx]);
+
 	const { address } = useAccount();
 
 	const tokenSelected = useMemo(() => {
@@ -86,6 +113,10 @@ const DialogSecuredAssets = ({ placeholder }: DialogSecuredAssetsProps) => {
 			return amountTokenBigInt > dataAllowance?.[0];
 		}
 	}, [isSuccessBalanceWallet, amountTokenBigInt, dataAllowance?.[0]]);
+
+	useEffect(() => {
+		setWaitingConformation(isPending);
+	}, [isPending, setWaitingConformation]);
 
 	return (
 		<Dialog>
@@ -141,7 +172,9 @@ const DialogSecuredAssets = ({ placeholder }: DialogSecuredAssetsProps) => {
 							amount === "" ||
 							amount === "0" ||
 							Number(amount) < 0 ||
-							tokensSelection === undefined
+							tokensSelection === undefined ||
+							isConfirming ||
+							isPending
 						}
 						onClick={() => {
 							{
